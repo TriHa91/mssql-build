@@ -20,14 +20,14 @@ services:
       timeout: 3s
       retries: 10
       start_period: 30s
-  # Add a separate container for tools
+      
   mssql-tools:
     image: mcr.microsoft.com/mssql-tools
     environment:
       - ACCEPT_EULA=Y
     networks:
       - network_test
-    command: tail -f /dev/null  # Keep container running
+    command: tail -f /dev/null  
     healthcheck:
       test: /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P "Rrkts@2025" -Q "SELECT 1" -b -o /dev/null
       interval: 30s
