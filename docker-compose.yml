@@ -1,0 +1,41 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Rrkts@2025
+      - MSSQL_PID=Express
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1433:1433"
+    networks:
+      - network_test
+    volumes:
+      - ./new_sqlserver_data:/var/opt/mssql
+    user: root
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep sqlservr | grep -v grep || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+  # Add a separate container for tools
+  mssql-tools:
+    image: mcr.microsoft.com/mssql-tools
+    environment:
+      - ACCEPT_EULA=Y
+    networks:
+      - network_test
+    command: tail -f /dev/null  # Keep container running
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P "Rrkts@2025" -Q "SELECT 1" -b -o /dev/null
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+networks:
+  network_test:
+    name: network_test
+    external: true
